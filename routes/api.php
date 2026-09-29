@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\InventoryAdjustmentController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('inventories/{inventory}/adjustments', [InventoryAdjustmentController::class, 'store'])
+        ->name('inventories.adjustments.store');
+});
