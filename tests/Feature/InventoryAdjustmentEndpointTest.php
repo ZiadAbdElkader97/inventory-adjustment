@@ -51,6 +51,21 @@ class InventoryAdjustmentEndpointTest extends TestCase
         ]);
     }
 
+    public function test_numeric_strings_are_accepted_as_quantities(): void
+    {
+        $inventory = Inventory::factory()->quantity(12)->create();
+
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $this->postJson($this->endpoint($inventory), [
+            'counted_quantity' => '9',
+            'reason' => 'Damaged items',
+            'expected_quantity' => '12',
+        ])->assertCreated()->assertJsonPath('data.movement.quantity_change', -3);
+
+        $this->assertSame(9, $inventory->fresh()->quantity);
+    }
+
     public function test_counting_more_than_recorded_records_a_positive_movement(): void
     {
         $inventory = Inventory::factory()->quantity(12)->create();
@@ -157,6 +172,7 @@ class InventoryAdjustmentEndpointTest extends TestCase
             'null counted quantity' => [['counted_quantity' => null, 'reason' => 'Damaged items'], 'counted_quantity'],
             'non numeric counted quantity' => [['counted_quantity' => 'nine', 'reason' => 'Damaged items'], 'counted_quantity'],
             'fractional counted quantity' => [['counted_quantity' => 9.5, 'reason' => 'Damaged items'], 'counted_quantity'],
+            'boolean counted quantity' => [['counted_quantity' => true, 'reason' => 'Damaged items'], 'counted_quantity'],
             'counted quantity too large' => [['counted_quantity' => 2_147_483_648, 'reason' => 'Damaged items'], 'counted_quantity'],
             'missing reason' => [['counted_quantity' => 9], 'reason'],
             'blank reason' => [['counted_quantity' => 9, 'reason' => '   '], 'reason'],
@@ -165,6 +181,7 @@ class InventoryAdjustmentEndpointTest extends TestCase
             'non string reason' => [['counted_quantity' => 9, 'reason' => ['Damaged items']], 'reason'],
             'negative expected quantity' => [['counted_quantity' => 9, 'reason' => 'Damaged items', 'expected_quantity' => -1], 'expected_quantity'],
             'non numeric expected quantity' => [['counted_quantity' => 9, 'reason' => 'Damaged items', 'expected_quantity' => 'twelve'], 'expected_quantity'],
+            'boolean expected quantity' => [['counted_quantity' => 9, 'reason' => 'Damaged items', 'expected_quantity' => true], 'expected_quantity'],
         ];
     }
 

@@ -27,9 +27,9 @@ class AdjustInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'counted_quantity' => ['required', 'integer', 'min:0', 'max:'.self::MAX_QUANTITY],
+            'counted_quantity' => ['required', 'numeric', 'integer', 'min:0', 'max:'.self::MAX_QUANTITY],
             'reason' => ['required', 'string', 'min:3', 'max:255'],
-            'expected_quantity' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:'.self::MAX_QUANTITY],
+            'expected_quantity' => ['sometimes', 'nullable', 'numeric', 'integer', 'min:0', 'max:'.self::MAX_QUANTITY],
         ];
     }
 
